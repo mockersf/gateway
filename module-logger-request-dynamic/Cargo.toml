@@ -1,0 +1,11 @@
+[package]
+name = "module-logger-request"
+version = "0.1.0"
+authors = ["François Mockers <mockersf@gmail.com>"]
+
+[lib]
+name = "module_logger_request"
+crate-type = ["dylib"]
+
+[dependencies]
+mini-http = { path = "../mini-http" }

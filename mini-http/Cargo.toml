@@ -1,5 +1,5 @@
 [package]
-name = "gateway"
+name = "mini-http"
 version = "0.1.0"
 authors = ["François Mockers <mockersf@gmail.com>"]
 
@@ -20,8 +20,4 @@ futures-cpupool = "*"
 serde = "*"
 serde_json = "*"
 serde_derive = "*"
-libloading = "*"
 
-mini-http = { path = "mini-http" }
-module-interface = { path = "module-interface" }
-module-logger-request = { path = "module-logger-request" }

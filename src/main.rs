@@ -8,6 +8,11 @@ extern crate bytes;
 extern crate tokio_io;
 extern crate tokio_core;
 extern crate httparse;
+extern crate libloading as lib;
+
+extern crate mini_http;
+extern crate module_interface;
+extern crate module_logger_request;
 
 use std::sync::mpsc;
 use std::thread;
@@ -19,15 +24,15 @@ use tokio_proto::TcpServer;
 use tokio_service::Service;
 use tokio_core::net::TcpStream;
 
-mod request;
-mod response;
-mod mini_http;
-use request::Request;
-use response::Response;
+use mini_http::request::Request;
+use mini_http::response::Response;
 use mini_http::Http;
+
+mod lib_loader;
 
 struct Gateway {
     remote_handle: tokio_core::reactor::Remote,
+    input_modules: Vec<Box<module_interface::InputModule>>,
 }
 
 impl Service for Gateway {
@@ -61,10 +66,16 @@ impl Gateway {
         resp
     }
 
+    fn do_input_modules(&self, req: &Request) {
+        for module in self.input_modules.iter() {
+            module.compute(req);
+        }
+    }
+
     fn forward(&self, req: Request) -> BoxFuture<Response, io::Error> {
-        //        println!("forward request: {:?}", req);
-        //        println!("data: {:?}", req.data);
         let (tx, rx) = futures::oneshot();
+
+        self.do_input_modules(&req);
 
         self.remote_handle
             .spawn(move |handle| {
@@ -90,7 +101,7 @@ impl Gateway {
         future::ok(Response::raw(data)).boxed()
     }
 }
-
+use std::clone::Clone;
 fn main() {
     let addr = "0.0.0.0:8080".parse().unwrap();
 
@@ -118,5 +129,18 @@ fn main() {
     let mut srv = TcpServer::new(Http, addr);
     srv.threads(num_cpus::get());
 
-    srv.serve(move || Ok(Gateway { remote_handle: remote.clone() }))
+    let logger_module = lib_loader::LoadedInputModule::load("aa");
+    let logger_module2 = lib_loader::LoadedInputModule::load("bb");
+
+    srv.serve(move || {
+        Ok(Gateway {
+               remote_handle: remote.clone(),
+               input_modules: {
+                   vec![Box::new(logger_module.clone()),
+                        Box::new(logger_module2.clone())
+                        //Box::new(module_logger_request::LoggerRequest {})
+                    ]
+               },
+           })
+    })
 }

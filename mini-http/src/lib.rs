@@ -1,7 +1,13 @@
+extern crate tokio_io;
+extern crate tokio_proto;
+extern crate bytes;
+extern crate httparse;
+
+pub mod request;
+pub mod response;
+
 use std::io;
 
-use request;
-use response;
 use request::Request;
 use response::Response;
 

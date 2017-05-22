@@ -1,0 +1,7 @@
+[package]
+name = "module-interface"
+version = "0.1.0"
+authors = ["François Mockers <mockersf@gmail.com>"]
+
+[dependencies]
+mini-http = { path = "../mini-http" }
