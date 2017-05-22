@@ -1,0 +1,23 @@
+[package]
+name = "gateway"
+version = "0.1.0"
+authors = ["François Mockers <mockersf@gmail.com>"]
+
+[dependencies]
+bytes = "*"
+futures = "*"
+httparse = "*"
+log = "*"
+net2 = "*"
+time = "*"
+tokio-core = "*"
+tokio-io = "*"
+tokio-proto = "*"
+tokio-service = "*"
+num_cpus = "*"
+url = "*"
+futures-cpupool = "*"
+serde = "*"
+serde_json = "*"
+serde_derive = "*"
+
