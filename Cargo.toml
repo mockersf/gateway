@@ -1,27 +1,15 @@
 [package]
 name = "gateway"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["François Mockers <mockersf@gmail.com>"]
 
 [dependencies]
-bytes = "*"
-futures = "*"
-httparse = "*"
-log = "*"
-net2 = "*"
-time = "*"
-tokio-core = "*"
-tokio-io = "*"
-tokio-proto = "*"
-tokio-service = "*"
-num_cpus = "*"
-url = "*"
-futures-cpupool = "*"
-serde = "*"
-serde_json = "*"
-serde_derive = "*"
-libloading = "*"
+futures = "0.1.13"
+tokio-core = "0.1.7"
+tokio-proto = "0.1.1"
+libloading = "0.4.0"
+lazy_static = "0.2.8"
 
-mini-http = { path = "mini-http" }
+hyper = { git = "https://github.com/hyperium/hyper.git" }
+
 module-interface = { path = "module-interface" }
-module-logger-request = { path = "module-logger-request" }
