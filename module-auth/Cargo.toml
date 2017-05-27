@@ -1,8 +1,13 @@
 [package]
-name = "module-logger-request"
+name = "module-auth"
 version = "0.1.0"
 authors = ["François Mockers <mockersf@gmail.com>"]
 
+[lib]
+name = "module_auth"
+crate-type = ["dylib"]
+
 [dependencies]
-mini-http = { path = "../mini-http" }
+hyper = { git = "https://github.com/hyperium/hyper.git" }
+
 module-interface = { path = "../module-interface" }

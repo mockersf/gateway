@@ -1,9 +1,10 @@
-extern crate mini_http;
+extern crate hyper;
+extern crate module_interface;
 
-use std::ffi::CString;
+use module_interface::ModuleResponse;
 
 #[no_mangle]
-pub fn compute(request: &mini_http::request::Request) -> CString {
-    println!("incoming data: {:?}", request.data);
-    CString::new("logged").unwrap()
+pub fn compute(request: &hyper::server::Request) -> ModuleResponse {
+    println!("incoming query: {:?} - {:?}", request.path(), request.headers());
+    ModuleResponse::Ignore
 }

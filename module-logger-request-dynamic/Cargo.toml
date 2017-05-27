@@ -8,4 +8,6 @@ name = "module_logger_request"
 crate-type = ["dylib"]
 
 [dependencies]
-mini-http = { path = "../mini-http" }
+hyper = { git = "https://github.com/hyperium/hyper.git" }
+
+module-interface = { path = "../module-interface" }

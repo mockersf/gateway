@@ -1,7 +1,16 @@
-extern crate mini_http;
+extern crate hyper;
+
+use hyper::server::Request;
 
 use std::ffi::CString;
 
 pub trait InputModule {
-    fn compute(&self, &mini_http::request::Request) -> CString; //where Self: Sized;
+    fn compute(&self, &Request) -> ModuleResponse;
+}
+
+
+#[derive(Debug)]
+pub enum ModuleResponse {
+    Stop,
+    Ignore,
 }
