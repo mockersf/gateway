@@ -24,10 +24,10 @@ use hyper::header::Host;
 use hyper::server::{Http, Service, Request, Response};
 use hyper::Client;
 
-
-use std::str;
+use module_interface::InputModule;
 
 mod lib_loader;
+use lib_loader::LoadedInputModule;
 
 lazy_static! {
     static ref REMOTE: Arc<Mutex<Cell<Option<Remote>>>> = Arc::new(Mutex::new(Cell::new(None)));
@@ -38,6 +38,9 @@ thread_local! {
             Client::new(&REMOTE.lock().unwrap().get_mut().clone().unwrap().handle().unwrap());
 }
 
+lazy_static! {
+    static ref INPUT_MODULES: Arc<Mutex<Vec<LoadedInputModule>>> = Arc::new(Mutex::new(vec![]));
+}
 
 #[derive(Clone, Copy)]
 struct Config {
@@ -46,7 +49,6 @@ struct Config {
 }
 
 struct Gateway {
-    input_modules: Vec<Box<module_interface::InputModule>>,
     config: Config,
 }
 
@@ -99,14 +101,13 @@ impl Gateway {
         futures::future::ok(Response::new().with_status(StatusCode::Accepted)).boxed()
     }
 
-    fn do_input_modules(&self, req: &Request) {
-        for module in self.input_modules.iter() {
-            module.compute(req);
-        }
-    }
-
     fn forward(&self, req: Request) -> Box<Future<Item = Response, Error = hyper::Error>> {
-        self.do_input_modules(&req);
+        for module in INPUT_MODULES.lock().unwrap().iter() {
+            match module.compute(&req) {
+                module_interface::ModuleResponse::Noop => (),
+                module_interface::ModuleResponse::Stop(resp) => return futures::future::ok(resp).boxed()
+            }
+        }
 
         let forwarded_request = self.forwarded_request(req);
         CLIENT.with(|client| {
@@ -136,19 +137,19 @@ fn main() {
         target_port: 8080,
     };
 
-    let module_path = "module-logger-request-dynamic/target/release/libmodule_logger_request.dylib";
-    let logger_module = lib_loader::LoadedInputModule::load(module_path);
-    let module_path = "module-auth/target/release/libmodule_auth.dylib";
-    let auth_module = lib_loader::LoadedInputModule::load(module_path);
+    {
+        let mut modules_lock = INPUT_MODULES.lock().unwrap();
+        let module_path = "module-logger-request-dynamic/target/release/libmodule_logger_request.dylib";
+        let logger_module = lib_loader::LoadedInputModule::load(module_path);
+        modules_lock.push(logger_module);
+        let module_path = "module-auth/target/release/libmodule_auth.dylib";
+        let auth_module = lib_loader::LoadedInputModule::load(module_path);
+        modules_lock.push(auth_module);
+    }
 
     let server = Http::new()
         .bind(&addr, move || {
-            Ok(Gateway {
-                   input_modules: {
-                       vec![Box::new(logger_module.clone()), Box::new(auth_module.clone())]
-                   },
-                   config,
-               })
+            Ok(Gateway { config })
         })
         .unwrap();
     println!("Listening on http://{} with 1 thread.",

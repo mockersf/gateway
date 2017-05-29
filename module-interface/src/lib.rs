@@ -1,8 +1,7 @@
 extern crate hyper;
 
 use hyper::server::Request;
-
-use std::ffi::CString;
+use hyper::server::Response;
 
 pub trait InputModule {
     fn compute(&self, &Request) -> ModuleResponse;
@@ -11,6 +10,6 @@ pub trait InputModule {
 
 #[derive(Debug)]
 pub enum ModuleResponse {
-    Stop,
-    Ignore,
+    Stop(Response),
+    Noop,
 }

@@ -1,0 +1,1 @@
+build with `cargo rustc --release -- -C prefer-dynamic`
