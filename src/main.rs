@@ -20,7 +20,6 @@ use futures::Future;
 use tokio_core::reactor::Remote;
 
 use hyper::StatusCode;
-use hyper::header::Host;
 use hyper::server::{Http, Service, Request, Response};
 use hyper::Client;
 
@@ -72,9 +71,6 @@ impl Gateway {
             .parse::<hyper::Uri>()
             .unwrap();
         let mut forwarded_request = req;
-        forwarded_request
-            .headers_mut()
-            .set::<Host>(Host::new(self.config.target, self.config.target_port));
         forwarded_request.set_uri(url);
         forwarded_request
     }
